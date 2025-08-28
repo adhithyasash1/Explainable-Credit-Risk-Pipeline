@@ -13,12 +13,12 @@ from sklearn.metrics import roc_auc_score, precision_score, recall_score
 warnings.filterwarnings("ignore", category=UserWarning)
 
 # --- Configuration ---
-MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI", "file:./mlruns")
+# Force local MLflow tracking
+MLFLOW_TRACKING_URI = "file:./mlruns"  # Always use local storage
 DATA_PATH = "data/CreditScoring.csv"
-ARTIFACT_PATH = "app" # Local path for temporary artifacts
+ARTIFACT_PATH = "app"  # Local path for temporary artifacts
 MODEL_NAME = "credit-risk-xgb"
 
-# --- Helper Functions (omitted for brevity, they are unchanged) ---
 def calculate_ks_statistic(y_true, y_proba):
     df = pd.DataFrame({'y_true': y_true, 'y_proba': y_proba})
     df_good = df[df['y_true'] == 1]
@@ -44,23 +44,45 @@ def feature_engineering(df):
     df = pd.get_dummies(df, columns=categorical_cols, drop_first=True, dtype=int)
     return df
 
-# --- Main Training Logic ---
 def train():
-    print("🚀 Starting training process...")
+    print("🚀 Starting training process with LOCAL MLflow...")
+    print(f"📁 MLflow tracking URI: {MLFLOW_TRACKING_URI}")
+    
+    # Set local tracking URI
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-    mlflow.set_experiment("Credit Risk Prediction")
+    
+    # Create or get experiment
+    try:
+        experiment = mlflow.set_experiment("Credit Risk Prediction")
+        print(f"✅ Using experiment: {experiment.name} (ID: {experiment.experiment_id})")
+    except Exception as e:
+        print(f"⚠️ Warning creating experiment: {e}")
+        print("Creating new experiment...")
+        mlflow.create_experiment("Credit Risk Prediction")
+        experiment = mlflow.set_experiment("Credit Risk Prediction")
 
     with mlflow.start_run() as run:
-        # ... (Data loading, feature engineering, train/test split are unchanged) ...
+        print(f"📊 MLflow Run ID: {run.info.run_id}")
+        
+        # Load and prepare data
+        print("Loading data...")
         df = pd.read_csv(DATA_PATH)
         df.columns = df.columns.str.capitalize()
         df['Status'] = df['Status'].apply(lambda x: 1 if x == 1 else 0)
+        
         X = df.drop('Status', axis=1)
         y = df['Status']
+        
+        # Feature engineering
+        print("Applying feature engineering...")
         X_engineered = feature_engineering(X.copy())
+        
+        # Train/test split
         X_train, X_test, y_train, y_test = train_test_split(
             X_engineered, y, test_size=0.25, random_state=42, stratify=y
         )
+        
+        # Align columns
         train_cols = X_train.columns
         test_cols = X_test.columns
         missing_in_test = set(train_cols) - set(test_cols)
@@ -68,48 +90,99 @@ def train():
             X_test[c] = 0
         X_test = X_test[train_cols]
         feature_names = X_train.columns.tolist()
-
-        # ... (Model Training is unchanged) ...
+        
+        # Model training
+        print("Training XGBoost model...")
         scale_pos_weight = (y_train == 0).sum() / (y_train == 1).sum()
         params = {
-            'objective': 'binary:logistic', 'eval_metric': 'auc', 'n_estimators': 200,
-            'learning_rate': 0.05, 'max_depth': 4, 'subsample': 0.8, 'colsample_bytree': 0.8,
-            'random_state': 42, 'scale_pos_weight': scale_pos_weight, 'early_stopping_rounds': 20
+            'objective': 'binary:logistic',
+            'eval_metric': 'auc',
+            'n_estimators': 200,
+            'learning_rate': 0.05,
+            'max_depth': 4,
+            'subsample': 0.8,
+            'colsample_bytree': 0.8,
+            'random_state': 42,
+            'scale_pos_weight': scale_pos_weight,
+            'early_stopping_rounds': 20
         }
+        
         model = xgb.XGBClassifier(**params)
         model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
-
-        # ... (Evaluation is unchanged) ...
+        
+        # Evaluation
         y_proba = model.predict_proba(X_test)[:, 1]
         auc = roc_auc_score(y_test, y_proba)
         ks = calculate_ks_statistic(y_test, y_proba)
-        metrics = {"AUC": auc, "KS_Statistic": ks}
+        
+        # Convert numpy float to Python float for proper JSON serialization
+        metrics = {
+            "AUC": float(auc),
+            "KS_Statistic": float(ks)
+        }
+        
+        print(f"📈 Model Performance:")
+        print(f"   - AUC: {metrics['AUC']:.4f}")
+        print(f"   - KS Statistic: {metrics['KS_Statistic']:.4f}")
+        
         mlflow.log_metrics(metrics)
-        print(f"Metrics: {metrics}")
-
-        # --- ARTIFACTS AND LOGGING (CORRECTED) ---
-        print("Generating and logging artifacts...")
+        
+        # Save artifacts locally first
+        print("Generating artifacts...")
         os.makedirs(ARTIFACT_PATH, exist_ok=True)
+        
+        # Save model
+        model_path = os.path.join(ARTIFACT_PATH, "model.joblib")
+        joblib.dump(model, model_path)
+        
+        # Create and save explainer
         explainer = shap.TreeExplainer(model)
         explainer_path = os.path.join(ARTIFACT_PATH, "explainer.joblib")
         joblib.dump(explainer, explainer_path)
         
+        # Save feature names
         feature_names_path = os.path.join(ARTIFACT_PATH, "feature_names.joblib")
         joblib.dump(feature_names, feature_names_path)
         
-        # Log the XGBoost model with an input example to create a signature
-        mlflow.xgboost.log_model(
-            xgb_model=model,
-            name="model", # Use 'name' instead of the deprecated 'artifact_path'
-            registered_model_name=MODEL_NAME,
-            input_example=X_train.iloc[:5] # Add input example
+        # Calculate and save global feature importance
+        print("Calculating global feature importance...")
+        shap_values = explainer.shap_values(X_test)
+        mean_abs_shap = np.abs(shap_values).mean(axis=0)
+        feature_importance = sorted(
+            zip(feature_names, mean_abs_shap),
+            key=lambda x: x[1],
+            reverse=True
         )
         
-        # Now, log the other artifacts to the SAME directory.
+        global_importance = [
+            {"feature": feat, "importance": float(imp)}
+            for feat, imp in feature_importance[:10]
+        ]
+        
+        global_importance_path = os.path.join(ARTIFACT_PATH, "global_feature_importance.json")
+        with open(global_importance_path, 'w') as f:
+            json.dump(global_importance, f, indent=2)
+        
+        # Log to MLflow
+        print("Logging artifacts to MLflow...")
+        
+        # Log the model with MLflow
+        mlflow.xgboost.log_model(
+            xgb_model=model,
+            artifact_path="model",
+            registered_model_name=MODEL_NAME,
+            input_example=X_train.iloc[:5]
+        )
+        
+        # Log additional artifacts
         mlflow.log_artifact(explainer_path, artifact_path="model")
         mlflow.log_artifact(feature_names_path, artifact_path="model")
+        mlflow.log_artifact(global_importance_path, artifact_path="model")
         
-        print("\n✅ Training complete! Model and artifacts logged to MLflow.")
+        print(f"\n✅ Training complete!")
+        print(f"📦 Model artifacts saved to: {ARTIFACT_PATH}/")
+        print(f"🔍 MLflow Run ID: {run.info.run_id}")
+        print(f"📊 Model registered as: {MODEL_NAME}")
 
 if __name__ == "__main__":
     train()
