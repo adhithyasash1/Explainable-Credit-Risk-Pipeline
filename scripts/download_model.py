@@ -11,34 +11,32 @@ DESTINATION_PATH = "app"
 def download_production_model():
     """
     Downloads the latest model version from the 'Production' stage
-    in the MLflow Model Registry.
+    using the model URI.
     """
     if not MLFLOW_TRACKING_URI:
         raise ValueError("MLFLOW_TRACKING_URI environment variable not set.")
 
     print(f"Connecting to MLflow at: {MLFLOW_TRACKING_URI}")
     mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
-    client = MlflowClient()
-
+    
     try:
-        # Get the latest version in the 'Production' stage
-        latest_versions = client.get_latest_versions(MODEL_NAME, stages=[MODEL_STAGE])
-        if not latest_versions:
-            raise ValueError(f"No model named '{MODEL_NAME}' found in stage '{MODEL_STAGE}'.")
+        # Define the model URI to download from
+        model_uri = f"models:/{MODEL_NAME}/{MODEL_STAGE}"
+        print(f"Downloading artifacts from model URI: '{model_uri}' to '{DESTINATION_PATH}'...")
         
-        model_version = latest_versions[0]
-        run_id = model_version.run_id
-        print(f"Found model version {model_version.version} from run_id: {run_id}")
-
-        # Download all artifacts from the model's run
-        print(f"Downloading artifacts to '{DESTINATION_PATH}'...")
         os.makedirs(DESTINATION_PATH, exist_ok=True)
-        client.download_artifacts(run_id, ".", dst_path=DESTINATION_PATH)
+        
+        # This function downloads all artifacts associated with the registered model version
+        local_path = mlflow.artifacts.download_artifacts(
+            artifact_uri=model_uri,
+            dst_path=DESTINATION_PATH
+        )
 
         print("✅ Successfully downloaded model artifacts:")
-        for f in os.listdir(DESTINATION_PATH):
-            if os.path.isfile(os.path.join(DESTINATION_PATH, f)):
-                print(f"  - {f}")
+        # List all files in the destination, including subdirectories
+        for root, _, files in os.walk(DESTINATION_PATH):
+            for name in files:
+                print(f"  - {os.path.join(root, name)}")
 
     except Exception as e:
         print(f"❌ Error downloading model: {e}")
