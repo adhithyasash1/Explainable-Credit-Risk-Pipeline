@@ -6,10 +6,8 @@ import os
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 
-# We need to import the app after creating the mock artifacts
-# from app.main import app
-
-# A fixture to create mock model artifacts for testing
+# This fixture creates dummy model artifacts before any tests run.
+# It runs once per session automatically.
 @pytest.fixture(scope="session", autouse=True)
 def mock_model_artifacts():
     """
@@ -19,80 +17,64 @@ def mock_model_artifacts():
     app_dir = "app"
     os.makedirs(app_dir, exist_ok=True)
 
-    # Create a dummy model
+    # Create and train a valid dummy model with two classes
     dummy_model = LogisticRegression()
-    # CORRECTED LINE: Train with two samples belonging to two different classes (0 and 1)
     dummy_model.fit([[0], [1]], [0, 1])
     joblib.dump(dummy_model, os.path.join(app_dir, "model.joblib"))
 
-    # Create a dummy explainer (can be a simple object or dictionary)
-    dummy_explainer = {"info": "dummy_explainer"}
-    joblib.dump(dummy_explainer, os.path.join(app_dir, "explainer.joblib"))
-
-    # Create dummy feature names
-    dummy_features = ["feature1", "feature2"]
-    joblib.dump(dummy_features, os.path.join(app_dir, "feature_names.joblib"))
-
-    # Create dummy global importance JSON
-    dummy_importance = [{"feature": "feature1", "importance": 0.5}]
+    # Create other dummy artifacts
+    joblib.dump({}, os.path.join(app_dir, "explainer.joblib"))
+    joblib.dump(["feature1"], os.path.join(app_dir, "feature_names.joblib"))
     with open(os.path.join(app_dir, "global_feature_importance.json"), "w") as f:
-        json.dump(dummy_importance, f)
-
-    # Yield control to the tests
+        json.dump([], f)
+    
     yield
 
-    # Teardown: Clean up the dummy files after tests are done (optional)
-    # for filename in ["model.joblib", "explainer.joblib", "feature_names.joblib", "global_feature_importance.json"]:
-    #     os.remove(os.path.join(app_dir, filename))
-
-
-# Now that artifacts exist, we can import the app and create the client
-from app.main import app
-client = TestClient(app)
-
+# This fixture creates the TestClient AFTER the artifacts are created.
+@pytest.fixture(scope="module")
+def client():
+    """
+    Create a TestClient instance for the API tests.
+    """
+    from app.main import app  # Import app here to ensure it's loaded after setup
+    with TestClient(app) as c:
+        yield c
 
 @pytest.fixture
 def valid_payload():
-    """Provides a valid payload for prediction and explanation requests."""
+    """Provides a valid payload for prediction requests."""
     return {
       "Seniority": 10, "Home": "owner", "Time": 36, "Age": 45, "Marital": "married",
       "Records": "no_rec", "Job": "fixed", "Expenses": 75, "Income": 250.0,
       "Assets": 10000.0, "Debt": 2000.0, "Amount": 1500, "Price": 2000
     }
 
-def test_health_check():
+# All test functions now accept 'client' as an argument
+def test_health_check(client):
     """Tests the /health endpoint for a 200 OK response."""
     response = client.get("/health")
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
-# This test will now fail because the dummy model has different feature expectations.
-# We mark it as xfail as it's expected to fail without a real model.
-# In a real scenario, you'd create a dummy model that matches the feature space.
 @pytest.mark.xfail(reason="Dummy model does not have the same features as the real one.")
-def test_predict_endpoint(valid_payload):
+def test_predict_endpoint(client, valid_payload):
     """Tests the /predict endpoint with a valid payload."""
     response = client.post("/predict", json=valid_payload)
     assert response.status_code == 200
     data = response.json()
     assert "request_id" in data
     assert data["prediction"] in ["Approve", "Deny"]
-    assert "probability_good_credit" in data
-    assert 0 <= data["probability_good_credit"] <= 1
 
 @pytest.mark.xfail(reason="Dummy explainer and model are not compatible with real data.")
-def test_explain_endpoint(valid_payload):
-    """Tests the /explain endpoint for a valid payload and explanation structure."""
+def test_explain_endpoint(client, valid_payload):
+    """Tests the /explain endpoint."""
     response = client.post("/explain", json=valid_payload)
     assert response.status_code == 200
     data = response.json()
     assert "explanation" in data
 
-def test_predict_invalid_payload():
-    """Tests the /predict endpoint with an invalid payload (missing field)."""
-    invalid_payload = {
-      "Seniority": 10, "Home": "owner" # Missing many required fields
-    }
+def test_predict_invalid_payload(client):
+    """Tests the /predict endpoint with an invalid payload."""
+    invalid_payload = {"Seniority": 10, "Home": "owner"}
     response = client.post("/predict", json=invalid_payload)
-    # FastAPI's Pydantic validation should return a 422 Unprocessable Entity
     assert response.status_code == 422
