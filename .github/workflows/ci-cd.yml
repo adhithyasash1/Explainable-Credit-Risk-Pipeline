@@ -1,3 +1,4 @@
+cat > credit-risk/.github/workflows/ci-cd.yml << 'EOF'
 name: CI-CD Pipeline for Credit Risk API
 
 on:
@@ -99,6 +100,9 @@ jobs:
       - name: Get GKE credentials
         run: gcloud container clusters get-credentials ${{ env.CLUSTER_NAME }} --zone ${{ env.ZONE }}
         
+      - name: Install gke-gcloud-auth-plugin
+        run: gcloud components install gke-gcloud-auth-plugin
+        
       - name: Deploy to GKE
         run: |
           # This command updates the image of the deployment to the newly pushed version
@@ -107,3 +111,4 @@ jobs:
           
           # Wait for the rollout to complete
           kubectl rollout status deployment/credit-risk-deployment
+EOF
