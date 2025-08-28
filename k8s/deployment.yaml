@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credit-risk-deployment
+  labels:
+    app: credit-risk-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: credit-risk-api
+  template:
+    metadata:
+      labels:
+        app: credit-risk-api
+      annotations:
+        # Annotations for Prometheus to scrape metrics from this pod
+        prometheus.io/scrape: 'true'
+        prometheus.io/path:   '/metrics'
+        prometheus.io/port:   '8000'
+    spec:
+      containers:
+      - name: credit-risk-api-container
+        # IMPORTANT: Replace this image path with your Artifact Registry path
+        image: us-central1-docker.pkg.dev/your-gcp-project-id/credit-risk-repo/credit-risk-api:latest
+        imagePullPolicy: "Always"
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: credit-risk-api-config
+        resources:
+          # Resource requests and limits are crucial for cluster stability
+          requests:
+            cpu: "500m"    # 0.5 vCPU
+            memory: "1Gi"  # 1 Gibibyte
+          limits:
+            cpu: "1"       # 1 vCPU
+            memory: "2Gi"  # 2 Gibibytes
+        # Probes ensure traffic is only sent to healthy, ready pods
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 20 # Give the app time to load the model
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 45
+          periodSeconds: 20

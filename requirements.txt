@@ -1,0 +1,22 @@
+# FastAPI and Web Server
+fastapi
+uvicorn[standard]
+gunicorn
+python-json-logger
+
+# ML & Data Science
+pandas
+scikit-learn
+xgboost
+joblib
+shap
+
+# ML Ops & Monitoring
+mlflow-skinny>=2.0.0  # Use lightweight client for inference
+prometheus-fastapi-instrumentator
+requests
+
+# Testing
+pytest
+httpx
+flake8

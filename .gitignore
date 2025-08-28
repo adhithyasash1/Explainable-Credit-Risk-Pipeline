@@ -1,0 +1,36 @@
+# Environment files
+.env
+*.env
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE and OS files
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# MLflow and data
+/mlruns/
+/data/CreditScoring.csv
+/app/*.joblib
+/app/*.json
+/app/model/
+
+# Test artifacts
+.pytest_cache/
+htmlcov/
+.coverage
