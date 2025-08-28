@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: us-central1-docker.pkg.dev/true-sprite-459511-f5/credit-risk-repo/credit-risk-api:prod-1756384885
+        image: us-central1-docker.pkg.dev/true-sprite-459511-f5/credit-risk-repo/credit-risk-api:prod-1756392674
         ports:
         - containerPort: 8000
         env:
