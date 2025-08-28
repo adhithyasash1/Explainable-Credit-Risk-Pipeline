@@ -20,11 +20,16 @@ WORKDIR /app
 
 # Create a non-root user for security
 RUN addgroup --system app && adduser --system --group app
-USER app
 
 # Copy installed wheels from the builder stage and install them
 COPY --from=builder /wheels /wheels
+
+# UPDATED LINE: Run pip install as the root user BEFORE switching to the non-root user.
+# This ensures packages are installed in the correct system-wide location.
 RUN pip install --no-cache /wheels/*
+
+# Switch to the non-root user for running the application
+USER app
 
 # Copy the application code and model artifacts
 COPY --chown=app:app ./app ./app
