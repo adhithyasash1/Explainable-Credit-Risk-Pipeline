@@ -21,8 +21,8 @@ spec:
     spec:
       containers:
       - name: credit-risk-api-container
-        # IMPORTANT: Replace this image path with your Artifact Registry path
-        image: us-central1-docker.pkg.dev/your-gcp-project-id/credit-risk-repo/credit-risk-api:latest
+        # Correct image path with the v1.0.0 tag
+        image: us-central1-docker.pkg.dev/true-sprite-459511-f5/credit-risk-repo/credit-risk-api:v1.0.0
         imagePullPolicy: "Always"
         ports:
         - containerPort: 8000
