@@ -21,7 +21,8 @@ def mock_model_artifacts():
 
     # Create a dummy model
     dummy_model = LogisticRegression()
-    dummy_model.fit([[0]], [0]) # Train with dummy data
+    # CORRECTED LINE: Train with two samples belonging to two different classes (0 and 1)
+    dummy_model.fit([[0], [1]], [0, 1])
     joblib.dump(dummy_model, os.path.join(app_dir, "model.joblib"))
 
     # Create a dummy explainer (can be a simple object or dictionary)
