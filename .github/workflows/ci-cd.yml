@@ -15,6 +15,7 @@ env:
   IMAGE_NAME: credit-risk-api
   CLUSTER_NAME: credit-risk-cluster
   ZONE: us-central1-a
+  MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
 
 jobs:
   lint-and-test:
@@ -55,6 +56,17 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install MLflow client
+        run: pip install mlflow
+
+      - name: Download Production Model from Registry
+        run: python scripts/download_model.py
 
       - name: Authenticate to Google Cloud
         uses: 'google-github-actions/auth@v1'

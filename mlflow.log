@@ -60,3 +60,12 @@ INFO  [alembic.runtime.migration] Will assume non-transactional DDL.
 [2025-08-28 16:35:02 +0000] [60553] [INFO] Booting worker with pid: 60553
 [2025-08-28 16:35:02 +0000] [60518] [ERROR] Worker (pid:60522) was sent SIGHUP!
 [2025-08-28 16:35:02 +0000] [60554] [INFO] Booting worker with pid: 60554
+Running the mlflow server failed. Please see the logs above for details.
+[2025-08-28 19:38:01 +0000] [60552] [INFO] Parent changed, shutting down: <Worker 60552>
+[2025-08-28 19:38:01 +0000] [60552] [INFO] Worker exiting (pid: 60552)
+[2025-08-28 19:38:01 +0000] [60554] [INFO] Parent changed, shutting down: <Worker 60554>
+[2025-08-28 19:38:01 +0000] [60554] [INFO] Worker exiting (pid: 60554)
+[2025-08-28 19:38:01 +0000] [60553] [INFO] Parent changed, shutting down: <Worker 60553>
+[2025-08-28 19:38:01 +0000] [60553] [INFO] Worker exiting (pid: 60553)
+[2025-08-28 19:38:01 +0000] [60551] [INFO] Parent changed, shutting down: <Worker 60551>
+[2025-08-28 19:38:01 +0000] [60551] [INFO] Worker exiting (pid: 60551)
