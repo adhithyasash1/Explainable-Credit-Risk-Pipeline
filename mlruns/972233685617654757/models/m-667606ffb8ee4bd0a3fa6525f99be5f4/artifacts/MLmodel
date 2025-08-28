@@ -1,0 +1,22 @@
+artifact_path: file:///home/sashiradhithya_gmail_com/credit-risk-explainable-api/mlruns/972233685617654757/models/m-667606ffb8ee4bd0a3fa6525f99be5f4/artifacts
+flavors:
+  python_function:
+    data: model.xgb
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.10.18
+  xgboost:
+    code: null
+    data: model.xgb
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: xgb
+    xgb_version: 3.0.4
+mlflow_version: 3.1.1
+model_id: m-667606ffb8ee4bd0a3fa6525f99be5f4
+model_size_bytes: 252776
+model_uuid: m-667606ffb8ee4bd0a3fa6525f99be5f4
+prompts: null
+run_id: 81fe47c4a6454615afe640b2d6f5cb1c
+utc_time_created: '2025-08-28 12:40:31.165858'

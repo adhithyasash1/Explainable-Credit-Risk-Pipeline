@@ -14,18 +14,26 @@ spec:
     spec:
       containers:
       - name: api-container
-        image: us-central1-docker.pkg.dev/true-sprite-459511-f5/credit-risk-repo/credit-risk-api:1756380348
+        image: us-central1-docker.pkg.dev/true-sprite-459511-f5/credit-risk-repo/credit-risk-api:prod-1756384885
         ports:
         - containerPort: 8000
+        env:
+          - name: MLFLOW_TRACKING_URI
+            value: "http://10.128.0.3:5000" # IMPORTANT: Update this
+          - name: MODEL_NAME
+            value: "credit-risk-xgb"
+          - name: DEFAULT_MODEL_STAGE
+            value: "Production"
         resources:
           requests:
-            cpu: "250m"
-            memory: "512Mi"
+            cpu: "500m"
+            memory: "1Gi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
         readinessProbe:
-          httpGet:
-            path: /health
-            port: 8000
+          httpGet: { path: /health, port: 8000 }
+          initialDelaySeconds: 20
         livenessProbe:
-          httpGet:
-            path: /health
-            port: 8000
+          httpGet: { path: /health, port: 8000 }
+          initialDelaySeconds: 40

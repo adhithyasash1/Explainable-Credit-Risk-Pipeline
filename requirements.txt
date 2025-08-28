@@ -5,3 +5,7 @@ pandas
 xgboost
 joblib
 shap
+mlflow-skinny # Use the lightweight client for inference
+gunicorn
+cachetools
+prometheus-fastapi-instrumentator
