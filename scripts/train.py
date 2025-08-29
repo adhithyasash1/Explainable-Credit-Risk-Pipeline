@@ -13,8 +13,8 @@ from sklearn.metrics import roc_auc_score, precision_score, recall_score
 warnings.filterwarnings("ignore", category=UserWarning)
 
 # --- Configuration ---
-# Force local MLflow tracking
-MLFLOW_TRACKING_URI = "file:./mlruns"  # Always use local storage
+# local MLflow tracking
+MLFLOW_TRACKING_URI = "file:./mlruns"  # use local storage
 DATA_PATH = "data/CreditScoring.csv"
 ARTIFACT_PATH = "app"  # Local path for temporary artifacts
 MODEL_NAME = "credit-risk-xgb"
