@@ -3,5 +3,5 @@ kind: ConfigMap
 metadata:
   name: credit-risk-api-config
 data:
-  # This version number can be updated by the CI/CD pipeline
+  # This version is a placeholder and will be managed by the deployment process
   MODEL_VERSION: "gke-v1.0"
