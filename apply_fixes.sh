@@ -1,3 +1,136 @@
+#!/bin/bash
+
+echo "🚀 Starting project cleanup..."
+
+# 1. Remove unnecessary and redundant files
+echo "Removing redundant files..."
+rm -f feature_names.txt
+rm -f credit_api_log.json
+rm -f app/feature_names.joblib
+git rm -r --cached mlruns/
+rm -rf mlruns/
+echo "✅ Files removed."
+
+# 2. Clean up build_and_push.sh (remove duplicate content)
+echo "Cleaning up build_and_push.sh..."
+cat > build_and_push.sh << 'EOSH'
+#!/bin/bash
+# This script builds the Docker image and pushes it to Google Artifact Registry.
+# Note: The CI/CD pipeline automates this. This is for manual execution.
+
+set -e # Exit immediately if a command exits with a non-zero status.
+
+# Authenticate Docker with Artifact Registry
+echo "🔐 Authenticating with Artifact Registry..."
+gcloud auth configure-docker ${REGION}-docker.pkg.dev
+
+# Build image
+echo "🔨 Building Docker image..."
+docker build -t ${REGION}-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE_NAME:latest .
+
+# Push image
+echo "⬆️ Pushing Docker image..."
+docker push ${REGION}-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE_NAME:latest
+
+echo "✅ Build and push complete."
+EOSH
+echo "✅ build_and_push.sh cleaned."
+
+# 3. Clean up k8s/configmap.yaml
+echo "Cleaning up k8s/configmap.yaml..."
+cat > k8s/configmap.yaml << 'EOYAML'
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: credit-risk-api-config
+data:
+  # This version number can be updated by the CI/CD pipeline
+  MODEL_VERSION: "gke-v1.0"
+EOYAML
+echo "✅ configmap.yaml cleaned."
+
+# 4. Clean up k8s/deployment.yaml
+echo "Cleaning up k8s/deployment.yaml..."
+cat > k8s/deployment.yaml << 'EOYAML'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: credit-risk-deployment
+  labels:
+    app: credit-risk-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: credit-risk-api
+  template:
+    metadata:
+      labels:
+        app: credit-risk-api
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '8000'
+    spec:
+      containers:
+      - name: credit-risk-api-container
+        # The image path uses variables that should be replaced during deployment
+        image: us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE_NAME:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: credit-risk-api-config
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+          limits:
+            cpu: "1"
+            memory: "2Gi"
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3
+EOYAML
+echo "✅ deployment.yaml cleaned."
+
+# 5. Clean up k8s/service.yaml
+echo "Cleaning up k8s/service.yaml..."
+cat > k8s/service.yaml << 'EOYAML'
+apiVersion: v1
+kind: Service
+metadata:
+  name: credit-risk-service
+spec:
+  # LoadBalancer exposes the service externally using a cloud provider's load balancer
+  type: LoadBalancer
+  selector:
+    app: credit-risk-api
+  ports:
+  - protocol: TCP
+    port: 80 # The port the service is exposed on
+    targetPort: 8000 # The port the container is listening on
+EOYAML
+echo "✅ service.yaml cleaned."
+
+# 6. Simplify the CI/CD pipeline
+echo "Simplifying .github/workflows/ci-cd.yml..."
+cat > .github/workflows/ci-cd.yml << 'EOYAML'
 name: CI-CD Pipeline for Credit Risk API
 
 on:
@@ -131,3 +264,8 @@ jobs:
           echo "✅ Deployment successful. Checking status..."
           kubectl get service credit-risk-service -o wide
           kubectl get pods
+EOYAML
+echo "✅ CI/CD pipeline simplified."
+
+echo "🎉 Cleanup complete! Your project is now more minimal."
+
