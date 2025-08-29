@@ -65,6 +65,9 @@ jobs:
       - name: Install dependencies for model download
         run: |
           pip install mlflow pandas scikit-learn xgboost shap joblib
+      
+      - name: Create dummy artifacts
+        run: python3 scripts/create_dummy_artifacts.py
 
       - name: Download or create model artifacts
         run: |
