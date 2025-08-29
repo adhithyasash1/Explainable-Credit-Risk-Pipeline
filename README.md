@@ -46,6 +46,7 @@ end-to-end machine learning pipeline for credit risk assessment featuring xgboos
 │   ├── test_api.py         # fastapi endpoint unit tests
 │   └── test_feature_engineering.py  # feature pipeline tests
 ├── deploy_on_gcp.sh        # automated gcp deployment script
+├── cleanup_gcp_resources.sh        # tear down the Google Cloud resources to prevent further costs
 ├── Dockerfile              # multi-stage container build
 └── .github/workflows/ci-cd.yml  # ci/cd pipeline with gcp integration
 ```
