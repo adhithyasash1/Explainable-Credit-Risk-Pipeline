@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
       - name: credit-risk-api-container
-        # The image path uses variables that should be replaced during deployment
+        # IMPORTANT: These variables ($PROJECT_ID, $REPO, $IMAGE_NAME)
+        # must be replaced with actual values before applying this manifest.
         image: us-central1-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE_NAME:latest
         imagePullPolicy: Always
         ports:
@@ -41,14 +42,9 @@ spec:
             port: 8000
           initialDelaySeconds: 30
           periodSeconds: 10
-          timeoutSeconds: 5
-          successThreshold: 1
-          failureThreshold: 3
         livenessProbe:
           httpGet:
             path: /health
             port: 8000
           initialDelaySeconds: 60
           periodSeconds: 30
-          timeoutSeconds: 5
-          failureThreshold: 3
