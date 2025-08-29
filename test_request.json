@@ -1,0 +1,15 @@
+{
+  "Seniority": 10,
+  "Home": "owner",
+  "Time": 36,
+  "Age": 45,
+  "Marital": "married",
+  "Records": "no_rec",
+  "Job": "fixed",
+  "Expenses": 75,
+  "Income": 250.0,
+  "Assets": 10000.0,
+  "Debt": 2000.0,
+  "Amount": 1500,
+  "Price": 2000
+}

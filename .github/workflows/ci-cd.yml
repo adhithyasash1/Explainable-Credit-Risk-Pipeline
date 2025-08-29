@@ -42,8 +42,7 @@ jobs:
 
       - name: Run Unit Tests
         run: |
-          # Run only tests in the tests/ directory, exclude scripts/
-          pytest tests/
+          pytest tests/ -v
 
   build-and-push:
     name: Build and Push Docker Image
@@ -69,42 +68,7 @@ jobs:
 
       - name: Download or create model artifacts
         run: |
-          # Try to download from MLflow, or create dummy artifacts for CI
-          python scripts/download_model.py || python -c "
-import os
-import joblib
-import json
-import pandas as pd
-import numpy as np
-from sklearn.linear_model import LogisticRegression
-
-os.makedirs('app', exist_ok=True)
-
-# Create a proper dummy model
-X = np.random.rand(100, 27)
-y = np.random.randint(0, 2, 100)
-model = LogisticRegression()
-model.fit(X, y)
-
-# Save all required artifacts
-joblib.dump(model, 'app/model.joblib')
-joblib.dump({}, 'app/explainer.joblib')
-
-# Generate feature names matching the expected count
-feature_names = ['Seniority', 'Time', 'Age', 'Expenses', 'Income', 'Assets', 'Debt', 
-                 'Amount', 'Price', 'Debt-to-Income', 'Loan-to-Price', 'Loan-to-Income',
-                 'Home_1', 'Home_2', 'Home_3', 'Home_4', 'Home_5', 'Home_6',
-                 'Marital_1', 'Marital_2', 'Marital_3', 'Marital_4', 'Marital_5',
-                 'Records_2', 'Job_1', 'Job_2', 'Job_3', 'Job_4']
-joblib.dump(feature_names, 'app/feature_names.joblib')
-
-# Create global importance file
-importance = [{'feature': f, 'importance': np.random.rand()} for f in feature_names[:10]]
-with open('app/global_feature_importance.json', 'w') as f:
-    json.dump(importance, f)
-
-print('Created dummy model artifacts for CI/CD')
-"
+          python scripts/download_model.py || python scripts/create_dummy_artifacts.py
 
       - name: Verify artifacts exist
         run: |
@@ -170,7 +134,6 @@ print('Created dummy model artifacts for CI/CD')
         
       - name: Update deployment image
         run: |
-          # Update the deployment with the new image
           kubectl set image deployment/credit-risk-deployment \
             credit-risk-api-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             --record
