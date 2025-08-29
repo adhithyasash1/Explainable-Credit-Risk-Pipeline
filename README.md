@@ -1,4 +1,4 @@
-# explainable production-grade credit risk pipeline (R Sashi Adhithya)
+# Explainable Production-Grade Credit Risk Pipeline
 
 production-ready credit scoring api with ml explainability, containerized deployment, and automated infrastructure provisioning on google cloud platform.
 
@@ -269,3 +269,5 @@ after successful deployment, the script provides external load balancer ip and v
 - prometheus metrics endpoint exposure
 
 the system automatically scales from 2 to 5 pods based on cpu utilization, ensuring consistent performance under varying load conditions while maintaining cost efficiency.
+
+# R Sashi Adhithya
