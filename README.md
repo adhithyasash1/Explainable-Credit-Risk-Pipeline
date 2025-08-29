@@ -1,4 +1,4 @@
-# explainable credit risk pipeline
+# explainable credit risk pipeline (R Sashi Adhithya)
 
 production-ready credit scoring api with ml explainability, containerized deployment, and automated infrastructure provisioning on google cloud platform.
 
