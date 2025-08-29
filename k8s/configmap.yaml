@@ -5,3 +5,15 @@ metadata:
 data:
   # This version number can be updated by the CI/CD pipeline
   MODEL_VERSION: "gke-v1.0"
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: credit-risk-api-config
+data:
+  MODEL_VERSION: "$MODEL_VERSION"
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: credit-risk-api-config
+data:
+  MODEL_VERSION: "$MODEL_VERSION"

@@ -1,0 +1,223 @@
+=== STARTING CHECK ===
+
+=== LOGGING VARIABLES ===
+EXTERNAL_IP=34.123.24.111
+REQ_FILE=test_request.json
+MLFLOW_LABEL=app=mlflow
+MLFLOW_PORT=5000
+K8S_NAMESPACE=default
+
+=== ENVIRONMENT VARIABLES ===
+SHELL=/bin/bash
+REGION=us-central1
+EXTERNAL_IP=34.123.24.111
+CONDA_EXE=/opt/conda/bin/conda
+CLUSTER_NAME=credit-risk-cluster
+VERTEX_PRODUCT=WORKBENCH_INSTANCE
+GRPC_FORK_SUPPORT_ENABLED=0
+DL_ANACONDA_HOME=/opt/conda
+FRAMEWORK_FILE_PATH=/opt/deeplearning/metadata/framework
+GOOGLE_CLOUD_PROJECT=true-sprite-459511-f5
+SSH_AUTH_SOCK=/tmp/ssh-3sOlSs9xXf/agent.5043
+REPO=credit-risk-repo
+POST_STARTUP_SCRIPT_PATH=/opt/c2d/post_start.sh
+DL_PATH_DEPS=/opt/deeplearning/deps
+DL_BIN_PATH=/opt/deeplearning/bin
+XML_CATALOG_FILES=file:///opt/conda/etc/xml/catalog file:///etc/xml/catalog
+BINARIES_PATH=/opt/deeplearning/binaries
+PWD=/home/sashiradhithya_gmail_com/credit-risk
+LOGNAME=sashiradhithya_gmail_com
+XDG_SESSION_TYPE=tty
+CONDA_PREFIX=/opt/conda
+TENSORBOARD_PROXY_URL=/proxy/%PORT%/
+GOOGLE_CLOUD_REGION=us-central1
+PACKAGE_SOURCE_CODE_PATH=/opt/deeplearning/src/third_party
+JUPYTER_DEPS_PATH=/opt/deeplearning/jupyter
+MOTD_SHOWN=pam
+ENV_URI_FILE_PATH=/opt/deeplearning/metadata/env_uri
+HOME=/home/sashiradhithya_gmail_com
+RESTRICTION_TYPE_FILE_PATH=/opt/deeplearning/restriction
+LANG=C.UTF-8
+LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.webp=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+ENV_VERSION_FILE_PATH=/opt/deeplearning/metadata/env_version
+CONDA_PROMPT_MODIFIER=(base) 
+TMPDIR=/var/tmp
+IS_WORKBENCH_IMAGE=true
+ZONE=us-central1-a
+LIT_PROXY_URL=/proxy/%PORT%/
+IMAGE_NAME=credit-risk-api
+SSH_CONNECTION=35.235.244.32 35411 10.128.0.3 22
+TITLE_FILE_PATH=/opt/deeplearning/metadata/title
+XDG_SESSION_CLASS=user
+ANACONDA_PYTHON_VERSION=3.10
+TERM=xterm-256color
+PROJECT_ID=true-sprite-459511-f5
+VERSION_FILE_PATH=/opt/deeplearning/metadata/version
+USER=sashiradhithya_gmail_com
+GCSFUSE_METADATA_IMAGE_TYPE=DLVM
+CONDA_SHLVL=2
+SHLVL=0
+XDG_SESSION_ID=3
+MOUNTS_ON_ALL_CONTAINERS=/usr/local/share/ca-certificates,/etc/ssl/certs,/etc/ca-certificates/update.d
+RELEASE_VERSION=20250603-2000-rc1
+CONDA_PYTHON_EXE=/opt/conda/bin/python
+LD_LIBRARY_PATH=/usr/local/cuda/lib64:/usr/local/nccl2/lib:/usr/local/cuda/extras/CUPTI/lib64:/usr/lib/x86_64-linux-gnu/:/opt/conda/lib
+ENABLE_MULTI_FRAMEWORK=true
+XDG_RUNTIME_DIR=/run/user/1440980472
+SSH_CLIENT=35.235.244.32 35411 22
+CONDA_DEFAULT_ENV=base
+NO_PACKAGE_MANAGER=false
+OPAL_PREFIX=/usr
+PROXY_BIN=/opt/bin
+ARTIFACT_REPO=credit-risk-repo
+DL_PATH=/opt/deeplearning
+WORKSPACE_PATH=/opt/deeplearning/workspace
+SRC_PATH=/opt/deeplearning/src
+OS_NAME=DEBIAN_11
+PATH=/home/sashiradhithya_gmail_com/.local/bin:/home/sashiradhithya_gmail_com/.local/bin:/usr/local/cuda/bin:/opt/conda/bin:/opt/conda/condabin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+MODEL_VERSION=gke-v2.0
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1440980472/bus
+SSH_TTY=/dev/pts/0
+CONDA_PREFIX_1=/opt/conda/envs/jupyterlab
+ENABLE_MULTI_ENV=true
+GOOGLE_VM_CONFIG_LOCK_FILE=/root/google_vm_config.lock
+TUTORIALS_PATH=/opt/deeplearning/workspace/tutorials
+DL_METADATA_PATH=/opt/deeplearning/metadata
+OLDPWD=/home/sashiradhithya_gmail_com/credit-risk
+_=/usr/bin/env
+
+=== TESTING FASTAPI ENDPOINTS ===
+Detected endpoints: /explain
+/global-importance
+/health
+/metrics
+/predict
+
+--- /explain [POST] ---
+✅ Active. Response preview:
+{
+  "request_id": "78005b65-3ecc-4427-b84e-364a3aaebd50",
+  "model_version": "$MODEL_VERSION",
+  "prediction": "Approve",
+  "probability_good_credit": 0.7445618510246277,
+  "risk_tier": "Tier 2: Low Risk",
+  "expected_loss": 344.84149169921875,
+  "explanation": [
+    {
+      "feature": "Assets",
+      "explanation": "The feature 'Assets' with value '10000.0' significantly decreased the risk of default."
+    },
+    {
+      "feature": "Seniority",
+      "explanation": "The feature 'Seniority' with value '10' significantly decreased the risk of default."
+    },
+    {
+      "feature": "Debt",
+      "explanation": "The feature 'Debt' with value '2000.0' significantly increased the risk of default."
+    },
+    {
+      "feature": "Records_2",
+      "explanation": "The feature 'Records_2' with value '0' significantly decreased the risk of default."
+    },
+    {
+      "feature": "Loan-to-Income",
+      "explanation": "An income of $6 significantly decreased the predicted risk of default."
+    }
+  ]
+}
+
+--- /global-importance [GET] ---
+✅ Active. Response preview:
+[
+  {
+    "feature": "Seniority",
+    "importance": 0.5888438820838928
+  },
+  {
+    "feature": "Records_2",
+    "importance": 0.47355687618255615
+  },
+  {
+    "feature": "Loan-to-Income",
+    "importance": 0.37569117546081543
+  },
+  {
+    "feature": "Assets",
+    "importance": 0.35959377884864807
+  },
+  {
+    "feature": "Loan-to-Price",
+    "importance": 0.3535708487033844
+  },
+  {
+    "feature": "Income",
+    "importance": 0.31563279032707214
+  },
+  {
+    "feature": "Expenses",
+    "importance": 0.18944087624549866
+  },
+  {
+    "feature": "Home_2",
+    "importance": 0.15219928324222565
+  },
+  {
+    "feature": "Job_1",
+    "importance": 0.14362511038780212
+  },
+  {
+    "feature": "Amount",
+    "importance": 0.13994185626506805
+  }
+]
+
+--- /health [GET] ---
+✅ Active. Response preview:
+{
+  "status": "ok",
+  "model_version": "$MODEL_VERSION"
+}
+
+--- /metrics [GET] ---
+✅ Active. Response preview:
+
+--- /predict [POST] ---
+✅ Active. Response preview:
+{
+  "request_id": "1dbd0c35-09a3-40f0-960f-66c0d1aa9be7",
+  "model_version": "$MODEL_VERSION",
+  "prediction": "Approve",
+  "probability_good_credit": 0.7445618510246277,
+  "risk_tier": "Tier 2: Low Risk",
+  "expected_loss": 344.84149169921875
+}
+
+=== KUBERNETES SERVICES ===
+NAME                  TYPE           CLUSTER-IP       EXTERNAL-IP     PORT(S)        AGE   SELECTOR
+credit-risk-service   LoadBalancer   34.118.230.198   34.123.24.111   80:32305/TCP   15h   app=credit-risk-api
+kubernetes            ClusterIP      34.118.224.1     <none>          443/TCP        15h   <none>
+
+=== KUBERNETES PODS AND PORTS ===
+{
+  "name": "credit-risk-deployment-95498cfd9-l8bwp",
+  "containers": [
+    {
+      "containerPort": 8000,
+      "protocol": "TCP"
+    }
+  ]
+}
+{
+  "name": "credit-risk-deployment-95498cfd9-xfnnj",
+  "containers": [
+    {
+      "containerPort": 8000,
+      "protocol": "TCP"
+    }
+  ]
+}
+
+=== TESTING MLFLOW ===
+❌ No MLflow pod found with label app=mlflow in namespace default
+
+=== END OF CHECK ===
