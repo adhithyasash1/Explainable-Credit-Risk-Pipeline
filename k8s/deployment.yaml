@@ -14,39 +14,40 @@ spec:
       labels:
         app: credit-risk-api
       annotations:
-        # Annotations for Prometheus to scrape metrics from this pod
         prometheus.io/scrape: 'true'
-        prometheus.io/path:   '/metrics'
-        prometheus.io/port:   '8000'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '8000'
     spec:
       containers:
       - name: credit-risk-api-container
-        # IMPORTANT: Replace this image path with your Artifact Registry path
-        image: us-central1-docker.pkg.dev/your-gcp-project-id/credit-risk-repo/credit-risk-api:latest
-        imagePullPolicy: "Always"
+        image: us-central1-docker.pkg.dev/true-sprite-459511-f5/credit-risk-repo/credit-risk-api:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
         envFrom:
         - configMapRef:
             name: credit-risk-api-config
         resources:
-          # Resource requests and limits are crucial for cluster stability
           requests:
-            cpu: "500m"    # 0.5 vCPU
-            memory: "1Gi"  # 1 Gibibyte
+            cpu: "250m"
+            memory: "512Mi"
           limits:
-            cpu: "1"       # 1 vCPU
-            memory: "2Gi"  # 2 Gibibytes
-        # Probes ensure traffic is only sent to healthy, ready pods
+            cpu: "1"
+            memory: "2Gi"
         readinessProbe:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 20 # Give the app time to load the model
+          initialDelaySeconds: 30
           periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
         livenessProbe:
           httpGet:
             path: /health
             port: 8000
-          initialDelaySeconds: 45
-          periodSeconds: 20
+          initialDelaySeconds: 60
+          periodSeconds: 30
+          timeoutSeconds: 5
+          failureThreshold: 3

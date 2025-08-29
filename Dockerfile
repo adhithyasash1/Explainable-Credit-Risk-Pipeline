@@ -1,8 +1,6 @@
 # --- Stage 1: Builder ---
-# This stage installs all dependencies, including build-time dependencies.
 FROM python:3.9-slim AS builder
 
-# Set environment variables for Python
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
@@ -13,30 +11,37 @@ COPY requirements.txt .
 RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
 
 # --- Stage 2: Final Image ---
-# This stage creates the final, lean production image.
 FROM python:3.9-slim
 
 WORKDIR /app
 
+# Install system dependencies for healthcheck
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Create a non-root user for security
 RUN addgroup --system app && adduser --system --group app
-USER app
 
-# Copy installed wheels from the builder stage and install them
+# Copy and install Python packages
 COPY --from=builder /wheels /wheels
-RUN pip install --no-cache /wheels/*
+RUN pip install --no-cache /wheels/* && rm -rf /wheels
 
-# Copy the application code and model artifacts
+# Copy application code first (as root to ensure proper ownership)
 COPY --chown=app:app ./app ./app
 
-# Expose the port the app runs on
+# Create a directory for model artifacts if they need to be mounted
+RUN mkdir -p /app/models && chown -R app:app /app
+
+# Switch to non-root user
+USER app
+
+# Expose the port
 EXPOSE 8000
 
-# Add a health check to ensure the container is running correctly
-HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1
 
-# Run the application with Gunicorn
-# Using 4 workers is a common starting point. Adjust based on performance testing.
-# The UvicornWorker class is used to run the ASGI application.
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "4", "-b", "0.0.0.0:8000", "app.main:app"]
+# Run the application
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-w", "4", "-b", "0.0.0.0:8000", "--timeout", "120", "app.main:app"]

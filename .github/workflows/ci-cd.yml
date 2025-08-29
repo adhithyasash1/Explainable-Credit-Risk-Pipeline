@@ -40,8 +40,9 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Run Pytest
-        run: pytest
+      - name: Run Unit Tests
+        run: |
+          pytest tests/ -v
 
   build-and-push:
     name: Build and Push Docker Image
@@ -56,25 +57,49 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies for model download
+        run: |
+          pip install mlflow pandas scikit-learn xgboost shap joblib
+
+      - name: Download or create model artifacts
+        run: |
+          python scripts/download_model.py || python scripts/create_dummy_artifacts.py
+
+      - name: Verify artifacts exist
+        run: |
+          ls -la app/
+          echo "Checking for required files..."
+          test -f app/model.joblib && echo "✓ model.joblib exists"
+          test -f app/explainer.joblib && echo "✓ explainer.joblib exists"
+          test -f app/feature_names.joblib && echo "✓ feature_names.joblib exists"
+          test -f app/global_feature_importance.json && echo "✓ global_feature_importance.json exists"
+
       - name: Authenticate to Google Cloud
         uses: 'google-github-actions/auth@v1'
         with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_SA_EMAIL }}
+          credentials_json: ${{ secrets.GCP_TOKEN }}
 
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v1'
 
-      - name: Configure Docker
+      - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
 
       - name: Build Docker image
         run: |
           docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+          docker tag ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                     ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Push Docker image to Artifact Registry
         run: |
           docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:latest
 
   deploy-to-gke:
     name: Deploy to GKE
@@ -92,20 +117,36 @@ jobs:
       - name: Authenticate to Google Cloud
         uses: 'google-github-actions/auth@v1'
         with:
-          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
-          service_account: ${{ secrets.GCP_SA_EMAIL }}
+          credentials_json: ${{ secrets.GCP_TOKEN }}
           
       - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v1'
         
-      - name: Get GKE credentials
-        run: gcloud container clusters get-credentials ${{ env.CLUSTER_NAME }} --zone ${{ env.ZONE }}
-        
-      - name: Deploy to GKE
+      - name: Install gke-gcloud-auth-plugin
         run: |
-          # This command updates the image of the deployment to the newly pushed version
-          kubectl set image deployment/credit-risk-deployment \
-            credit-risk-api-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          gcloud components install gke-gcloud-auth-plugin
           
-          # Wait for the rollout to complete
-          kubectl rollout status deployment/credit-risk-deployment
+      - name: Get GKE credentials
+        run: |
+          gcloud container clusters get-credentials ${{ env.CLUSTER_NAME }} \
+            --zone ${{ env.ZONE }} \
+            --project ${{ env.PROJECT_ID }}
+        
+      - name: Update deployment image
+        run: |
+          kubectl set image deployment/credit-risk-deployment \
+            credit-risk-api-container=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.ARTIFACT_REPO }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --record
+          
+      - name: Wait for rollout to complete
+        run: |
+          kubectl rollout status deployment/credit-risk-deployment --timeout=5m
+          
+      - name: Verify deployment
+        run: |
+          echo "Checking deployment status..."
+          kubectl get deployments
+          echo "Checking pods..."
+          kubectl get pods
+          echo "Checking service..."
+          kubectl get service credit-risk-service
